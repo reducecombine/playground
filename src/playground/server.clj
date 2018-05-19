@@ -1,8 +1,9 @@
 (ns playground.server
-  (:gen-class) ; for -main method in uberjar
-  (:require [io.pedestal.http :as server]
-            [io.pedestal.http.route :as route]
-            [playground.service :as service]))
+  (:gen-class)
+  (:require
+   [io.pedestal.http :as server]
+   [io.pedestal.http.route :as route]
+   [playground.service :as service]))
 
 ;; This is an adapted service map, that can be started and stopped
 ;; From the REPL you can call server/start and server/stop on this service
@@ -20,10 +21,9 @@
               ;;  we can use this to set the routes to be reloadable
               ::server/routes #(route/expand-routes (deref #'service/routes))
               ;; all origins are allowed in dev mode
-              ::server/allowed-origins {:creds true :allowed-origins (constantly true)}
+              ::server/allowed-origins {:creds true :allowed-origins any?}
               ;; Content Security Policy (CSP) is mostly turned off in dev mode
               ::server/secure-headers {:content-security-policy-settings {:object-src "none"}}})
-      ;; Wire up interceptor chains
       server/default-interceptors
       server/dev-interceptors
       server/create-server
@@ -34,23 +34,3 @@
   [& args]
   (println "\nCreating your server...")
   (server/start runnable-service))
-
-;; If you package the service up as a WAR,
-;; some form of the following function sections is required (for io.pedestal.servlet.ClojureVarServlet).
-
-;;(defonce servlet  (atom nil))
-;;
-;;(defn servlet-init
-;;  [_ config]
-;;  ;; Initialize your app here.
-;;  (reset! servlet  (server/servlet-init service/service nil)))
-;;
-;;(defn servlet-service
-;;  [_ request response]
-;;  (server/servlet-service @servlet request response))
-;;
-;;(defn servlet-destroy
-;;  [_]
-;;  (server/servlet-destroy @servlet)
-;;  (reset! servlet nil))
-
