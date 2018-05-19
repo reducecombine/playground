@@ -5,8 +5,10 @@
    [io.pedestal.http :as http]
    [io.pedestal.http.route :as route]
    [io.pedestal.http.body-params :as body-params]
+   [io.pedestal.interceptor.chain :as interceptor-chain]
    [ring.util.response :as ring-resp]
-   [playground.coerce :as coerce]))
+   [playground.coerce :as coerce]
+   [playground.spec-utils :as spec-utils]))
 
 (defn about-page [request]
   (->> (route/url-for ::about-page)
@@ -23,10 +25,22 @@
 
 (spec/def ::api (spec/keys :req-un [::temperature ::orientation]))
 
-(defn api [{:keys [db query-params] :as request}]
-  (let [{:keys [temperature orientation]} (coerce/coerce! ::api query-params)]
-    {:status 200
-     :body {:temperature temperature :orientation orientation}}))
+(defn api [{{:keys [temperature orientation]} :query-params :keys [db] :as request}]
+  {:status 200
+   :body {:temperature temperature :orientation orientation}})
+
+(defn param-spec-interceptor
+  "Coerces params according to a spec. If invalid, aborts the interceptor-chain with 422, explaining the issue."
+  [spec params-key]
+  {:name ::param-spec-interceptor
+   :enter (fn [context]
+            (let [result (coerce/coerce-map-indicating-invalidity spec (get-in context [:request params-key]))]
+              (if (contains? result ::coerce/invalid?)
+                (-> context
+                    (assoc :response {:status 422
+                                      :body {:explanation (spec/explain-str spec result)}})
+                    interceptor-chain/terminate)
+                (assoc-in context [:request params-key] result))))})
 
 (defn context-injector [components]
   {:enter (fn [{:keys [request] :as context}]
@@ -48,7 +62,7 @@
   "Tabular routes"
   #{["/" :get (conj common-interceptors `home-page)]
     ["/about" :get (conj common-interceptors `about-page)]
-    ["/api" :get (into component-interceptors [http/json-body `api])]})
+    ["/api" :get (into component-interceptors [http/json-body (param-spec-interceptor ::api :query-params) `api])]})
 
 (comment
   (def routes
