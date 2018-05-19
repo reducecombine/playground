@@ -7,6 +7,7 @@
                  [org.clojure/tools.logging "0.4.0"]
                  [com.grzm/component.pedestal "0.1.7"]
                  [com.stuartsierra/component "0.3.2"]
+                 [expound "0.6.0"]
                  [io.pedestal/pedestal.service "0.5.3"]
                  [io.pedestal/pedestal.jetty "0.5.3"]
                  [juxt.modular/postgres "0.0.1-SNAPSHOT"]
@@ -14,7 +15,8 @@
                  [org.slf4j/jul-to-slf4j "1.7.22"]
                  [org.slf4j/jcl-over-slf4j "1.7.22"]
                  [org.slf4j/log4j-over-slf4j "1.7.22"]
-                 [prismatic/schema "1.1.9"]]
+                 [prismatic/schema "1.1.9"]
+                 [spec-coerce "1.0.0-alpha6"]]
   :repl-options {:port 41234}
   :min-lein-version "2.0.0"
   :resource-paths ["config" "resources"]

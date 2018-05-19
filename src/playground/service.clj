@@ -1,10 +1,12 @@
 (ns playground.service
   (:require
+   [clojure.spec.alpha :as spec]
    [com.grzm.component.pedestal :as pedestal-component]
    [io.pedestal.http :as http]
    [io.pedestal.http.route :as route]
    [io.pedestal.http.body-params :as body-params]
-   [ring.util.response :as ring-resp]))
+   [ring.util.response :as ring-resp]
+   [playground.coerce :as coerce]))
 
 (defn about-page [request]
   (->> (route/url-for ::about-page)
@@ -15,9 +17,16 @@
 (defn home-page [request]
   (ring-resp/response "Hello World!"))
 
-(defn api [{:keys [query-params db] :as request}]
-  {:status 200
-   :body {:omg [1 2 3] 2 #{(-> query-params :a Integer. (* 10))}}})
+(spec/def ::temperature int?)
+
+(spec/def ::orientation (spec/and keyword? #{:north :south :east :west}))
+
+(spec/def ::api (spec/keys :req-un [::temperature ::orientation]))
+
+(defn api [{:keys [db query-params] :as request}]
+  (let [{:keys [temperature orientation]} (coerce/coerce! ::api query-params)]
+    {:status 200
+     :body {:temperature temperature :orientation orientation}}))
 
 (defn context-injector [components]
   {:enter (fn [{:keys [request] :as context}]
