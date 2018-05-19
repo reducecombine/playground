@@ -1,5 +1,6 @@
 (ns playground.service
   (:require
+   [com.grzm.component.pedestal :as pedestal-component]
    [io.pedestal.http :as http]
    [io.pedestal.http.route :as route]
    [io.pedestal.http.body-params :as body-params]
@@ -14,9 +15,10 @@
 (defn home-page [request]
   (ring-resp/response "Hello World!"))
 
-(defn api [request]
-  {:status 200
-   :body {:omg [1 2 3] 2 #{}}})
+(defn api [{:keys [query-params] :as request}]
+  (let [db (pedestal-component/use-component request :db)]
+    {:status 200
+     :body {:omg [1 2 3] 2 #{(-> query-params :a Integer. (* 10))}}}))
 
 ;; Defines "/" and "/about" routes with their associated :get handlers.
 ;; The interceptors defined after the verb map (e.g., {:get home-page}
@@ -27,7 +29,7 @@
   "Tabular routes"
   #{["/" :get (conj common-interceptors `home-page)]
     ["/about" :get (conj common-interceptors `about-page)]
-    ["/api" :get [http/json-body `api]]})
+    ["/api" :get [(pedestal-component/using-component :db) http/json-body `api]]})
 
 (comment
   (def routes

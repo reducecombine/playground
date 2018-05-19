@@ -14,8 +14,10 @@
    [clojure.set :as set]
    [clojure.string :as string]
    [clojure.tools.namespace.repl :refer [refresh refresh-all clear]]
+   [com.grzm.component.pedestal :as pedestal-component]
    [com.stuartsierra.component :as component]
    [com.stuartsierra.component.repl :refer [reset set-init start stop system]]
+   [modular.postgres]
    [playground.server]))
 
 ;; NOTE: Do not try to load source code from 'resources' directory
@@ -25,9 +27,9 @@
   []
   (component/system-map
    :service-map playground.server/dev-map
-
-   :pedestal (component/using (playground.server/map->Pedestal {})
-                              [:service-map])))
+   :db (modular.postgres/map->Postgres {:url "localhost" :user "postgres" :password "postgres"})
+   :pedestal (component/using (pedestal-component/pedestal (constantly playground.server/dev-map))
+                              [:db])))
 
 (set-init (fn [_]
             (dev-system)))
