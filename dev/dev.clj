@@ -22,10 +22,12 @@
 (clojure.tools.namespace.repl/set-refresh-dirs "dev" "src" "test")
 
 (defn dev-system
-  "Constructs a system map suitable for interactive development."
   []
   (component/system-map
-   ))
+   :service-map playground.server/dev-map
+
+   :pedestal (component/using (playground.server/map->Pedestal {})
+                              [:service-map])))
 
 (set-init (fn [_]
             (dev-system)))

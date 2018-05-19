@@ -1,20 +1,12 @@
 (ns playground.server
   (:gen-class)
   (:require
+   [com.stuartsierra.component :as component]
    [io.pedestal.http :as server]
    [io.pedestal.http.route :as route]
    [playground.service :as service]))
 
-;; This is an adapted service map, that can be started and stopped
-;; From the REPL you can call server/start and server/stop on this service
-(defonce runnable-service
-  (when false
-    (server/create-server service/service)))
-
-(defn run-dev
-  "The entry-point for 'lein run-dev'"
-  [& args]
-  (println "\nCreating your [DEV] server...")
+(def dev-map
   (-> service/service ;; start with production configuration
       (merge {:env :dev
               ;; do not block thread that starts web server
@@ -27,14 +19,35 @@
               ;; Content Security Policy (CSP) is mostly turned off in dev mode
               ::server/secure-headers {:content-security-policy-settings {:object-src "none"}}})
       server/default-interceptors
-      server/dev-interceptors
-      server/create-server
-      server/start))
+      server/dev-interceptors))
+
+(defn run-dev
+  "The entry-point for 'lein run-dev'"
+  [& args]
+  (println "\nCreating your [DEV] server...")
+  (-> dev-map server/create-server server/start))
 
 (defn -main
   "The entry-point for 'lein run'"
   [& args]
   (println "\nCreating your server...")
-  (server/start runnable-service))
+  (-> service/service server/create-server server/start))
 
-(defonce dev-serv (run-dev))
+(defn test?
+  [service-map]
+  (-> service-map :env #{:test}))
+
+(defrecord Pedestal [service-map service]
+  component/Lifecycle
+  (start [this]
+    (if service
+      this
+      (cond-> service-map
+        true server/create-server
+        (not (test? service-map)) server/start
+        true ((partial assoc this :service)))))
+
+  (stop [this]
+    (when (and service (not (test? service-map)))
+      (server/stop service))
+    (dissoc this :service)))
