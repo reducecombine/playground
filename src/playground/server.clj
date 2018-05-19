@@ -7,7 +7,9 @@
 
 ;; This is an adapted service map, that can be started and stopped
 ;; From the REPL you can call server/start and server/stop on this service
-(defonce runnable-service (server/create-server service/service))
+(defonce runnable-service
+  (when false
+    (server/create-server service/service)))
 
 (defn run-dev
   "The entry-point for 'lein run-dev'"
@@ -34,3 +36,5 @@
   [& args]
   (println "\nCreating your server...")
   (server/start runnable-service))
+
+(defonce dev-serv (run-dev))
