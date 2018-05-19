@@ -15,21 +15,31 @@
 (defn home-page [request]
   (ring-resp/response "Hello World!"))
 
-(defn api [{:keys [query-params] :as request}]
-  (let [db (pedestal-component/use-component request :db)]
-    {:status 200
-     :body {:omg [1 2 3] 2 #{(-> query-params :a Integer. (* 10))}}}))
+(defn api [{:keys [query-params db] :as request}]
+  {:status 200
+   :body {:omg [1 2 3] 2 #{(-> query-params :a Integer. (* 10))}}})
 
-;; Defines "/" and "/about" routes with their associated :get handlers.
-;; The interceptors defined after the verb map (e.g., {:get home-page}
-;; apply to / and its children (/about).
-(def common-interceptors [(body-params/body-params) http/html-body])
+(defn context-injector [components]
+  {:enter (fn [{:keys [request] :as context}]
+            (reduce (fn [v component]
+                      (assoc-in v [:request component] (pedestal-component/use-component request component)))
+                    context
+                    components))
+   :name ::context-injector})
+
+(def components-to-inject [:db])
+
+(def component-interceptors
+  (conj (mapv pedestal-component/using-component components-to-inject)
+        (context-injector components-to-inject)))
+
+(def common-interceptors (into component-interceptors [(body-params/body-params) http/html-body]))
 
 (def routes
   "Tabular routes"
   #{["/" :get (conj common-interceptors `home-page)]
     ["/about" :get (conj common-interceptors `about-page)]
-    ["/api" :get [(pedestal-component/using-component :db) http/json-body `api]]})
+    ["/api" :get (into component-interceptors [http/json-body `api])]})
 
 (comment
   (def routes

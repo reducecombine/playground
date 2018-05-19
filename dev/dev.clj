@@ -18,7 +18,8 @@
    [com.stuartsierra.component :as component]
    [com.stuartsierra.component.repl :refer [reset set-init start stop system]]
    [modular.postgres]
-   [playground.server]))
+   [playground.server]
+   [playground.service]))
 
 ;; NOTE: Do not try to load source code from 'resources' directory
 (clojure.tools.namespace.repl/set-refresh-dirs "dev" "src" "test")
@@ -29,7 +30,7 @@
    :service-map playground.server/dev-map
    :db (modular.postgres/map->Postgres {:url "localhost" :user "postgres" :password "postgres"})
    :pedestal (component/using (pedestal-component/pedestal (constantly playground.server/dev-map))
-                              [:db])))
+                              playground.service/components-to-inject)))
 
 (set-init (fn [_]
             (dev-system)))
