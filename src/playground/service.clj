@@ -11,6 +11,7 @@
    [clojure.java.jdbc :as clojure-jdbc]
    [ring.util.response :as ring-resp]
    [playground.coerce :as coerce]
+   [playground.jobs.sample]
    [playground.spec-utils :as spec-utils]))
 
 (defn about-page [request]
@@ -36,7 +37,7 @@
         first
         prn))
   (go
-    (-> background-processor :queue (>! temperature)))
+    (-> background-processor :queue (>! (playground.jobs.sample/new temperature))))
   {:status 200
    :body {:temperature temperature :orientation orientation}})
 

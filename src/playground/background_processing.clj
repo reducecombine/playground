@@ -10,9 +10,9 @@
     (reset! running true)
     (let [runner (future
                    (while @running
-                     (let [[val port] (async/alts!! [queue (async/timeout 100)])]
+                     (let [[runnable port] (async/alts!! [queue (async/timeout 100)])]
                        (when (= port queue)
-                         (log/error :temperature val)))))]
+                         (runnable)))))]
       (assoc this :future runner)))
 
   (stop [this]
