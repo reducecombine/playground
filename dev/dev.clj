@@ -18,6 +18,7 @@
    [com.stuartsierra.component :as component]
    [com.stuartsierra.component.repl :refer [reset set-init start stop system]]
    [modular.postgres]
+   [playground.background-processing]
    [playground.server]
    [playground.service]))
 
@@ -28,6 +29,7 @@
   []
   (component/system-map
    :service-map playground.server/dev-map
+   :background-processor (playground.background-processing/new)
    :db (modular.postgres/map->Postgres {:url "jdbc:postgresql://localhost/ebdb" :user "vemv" :password ""})
    :pedestal (component/using (pedestal-component/pedestal (constantly playground.server/dev-map))
                               playground.service/components-to-inject)))

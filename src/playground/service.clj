@@ -1,5 +1,6 @@
 (ns playground.service
   (:require
+   [clojure.core.async :as async :refer [go >!]]
    [clojure.spec.alpha :as spec]
    [com.grzm.component.pedestal :as pedestal-component]
    [io.pedestal.http :as http]
@@ -27,13 +28,15 @@
 
 (spec/def ::api (spec/keys :req-un [::temperature ::orientation]))
 
-(defn api [{{:keys [temperature orientation]} :query-params :keys [db] :as request}]
+(defn api [{{:keys [temperature orientation]} :query-params :keys [db background-processor] :as request}]
   (comment
     (-> db :pool funcool-jdbc/connection (funcool-jdbc/fetch ["select * from users"]) first prn)
     (-> (->> db :pool (hash-map :datasource))
         (clojure-jdbc/query ["select * from users"])
         first
         prn))
+  (go
+    (-> background-processor :queue (>! temperature)))
   {:status 200
    :body {:temperature temperature :orientation orientation}})
 
@@ -58,7 +61,7 @@
                     components))
    :name ::context-injector})
 
-(def components-to-inject [:db])
+(def components-to-inject [:db :background-processor])
 
 (def component-interceptors
   (conj (mapv pedestal-component/using-component components-to-inject)
