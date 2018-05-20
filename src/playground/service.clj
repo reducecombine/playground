@@ -6,6 +6,8 @@
    [io.pedestal.http.route :as route]
    [io.pedestal.http.body-params :as body-params]
    [io.pedestal.interceptor.chain :as interceptor-chain]
+   [jdbc.core :as funcool-jdbc]
+   [clojure.java.jdbc :as clojure-jdbc]
    [ring.util.response :as ring-resp]
    [playground.coerce :as coerce]
    [playground.spec-utils :as spec-utils]))
@@ -26,6 +28,12 @@
 (spec/def ::api (spec/keys :req-un [::temperature ::orientation]))
 
 (defn api [{{:keys [temperature orientation]} :query-params :keys [db] :as request}]
+  (comment
+    (-> db :pool funcool-jdbc/connection (funcool-jdbc/fetch ["select * from users"]) first prn)
+    (-> (->> db :pool (hash-map :datasource))
+        (clojure-jdbc/query ["select * from users"])
+        first
+        prn))
   {:status 200
    :body {:temperature temperature :orientation orientation}})
 

@@ -28,7 +28,7 @@
   []
   (component/system-map
    :service-map playground.server/dev-map
-   :db (modular.postgres/map->Postgres {:url "localhost" :user "postgres" :password "postgres"})
+   :db (modular.postgres/map->Postgres {:url "jdbc:postgresql://localhost/ebdb" :user "vemv" :password ""})
    :pedestal (component/using (pedestal-component/pedestal (constantly playground.server/dev-map))
                               playground.service/components-to-inject)))
 
