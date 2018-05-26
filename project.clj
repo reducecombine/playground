@@ -3,7 +3,9 @@
   :url ""
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.9.0"]
+  :dependencies [[amazonica "0.3.125"]
+                 [better-cond "1.0.1"]
+                 [org.clojure/clojure "1.9.0"]
                  [org.clojure/core.async "0.4.474"]
                  [org.clojure/java.jdbc "0.7.6"]
                  [org.clojure/tools.logging "0.4.0"]

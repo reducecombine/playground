@@ -29,7 +29,7 @@
 
 (spec/def ::api (spec/keys :req-un [::temperature ::orientation]))
 
-(defn api [{{:keys [temperature orientation]} :query-params :keys [db background-processor] :as request}]
+(defn api [{{:keys [temperature orientation]} :query-params :keys [db enqueuer] :as request}]
   (comment
     (-> db :pool funcool-jdbc/connection (funcool-jdbc/fetch ["select * from users"]) first prn)
     (-> (->> db :pool (hash-map :datasource))
@@ -37,7 +37,7 @@
         first
         prn))
   (go
-    (-> background-processor :queue (>! (playground.jobs.sample/new temperature))))
+    (-> enqueuer :channel (>! (playground.jobs.sample/new temperature))))
   {:status 200
    :body {:temperature temperature :orientation orientation}})
 
@@ -62,7 +62,7 @@
                     components))
    :name ::context-injector})
 
-(def components-to-inject [:db :background-processor])
+(def components-to-inject [:db :background-processor :enqueuer])
 
 (def component-interceptors
   (conj (mapv pedestal-component/using-component components-to-inject)
