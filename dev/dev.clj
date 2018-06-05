@@ -18,8 +18,8 @@
    [com.stuartsierra.component :as component]
    [com.stuartsierra.component.repl :refer [reset set-init start stop system]]
    [modular.postgres]
-   [playground.background-processing]
-   [playground.enqueueing]
+   [background-processing.background-processor :as background-processor]
+   [background-processing.enqueuer :as enqueuer]
    [playground.server]
    [playground.service]))
 
@@ -30,8 +30,8 @@
   []
   (component/system-map
    :service-map playground.server/dev-map
-   :background-processor (playground.background-processing/new :queue-name "cljtest")
-   :enqueuer (playground.enqueueing/new :queue-name "cljtest")
+   :background-processor (background-processor/new :queue-name "cljtest")
+   :enqueuer (enqueuer/new :queue-name "cljtest")
    :db (modular.postgres/map->Postgres {:url "jdbc:postgresql://localhost/ebdb" :user "vemv" :password ""})
    :pedestal (component/using (pedestal-component/pedestal (constantly playground.server/dev-map))
                               playground.service/components-to-inject)))

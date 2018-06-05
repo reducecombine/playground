@@ -1,10 +1,14 @@
 (ns playground.jobs.sample
-  (:require [io.pedestal.log :as log]))
+  (:require
+   [background-processing.background-job :as background-job]
+   [io.pedestal.log :as log]))
 
 (defrecord Sample [temperature]
-  clojure.lang.IFn
-  (invoke [_]
-    (log/error ::temperature (* 100 temperature))))
+  background-job/BackgroundJob
+  (perform [_]
+    (log/error ::temperature (* 100 temperature)))
+  (type [_]
+    ::background-job/cpu-bound))
 
 (defn new [temperature]
   (map->Sample {:temperature temperature}))
