@@ -12,7 +12,6 @@
                  [com.mchange/c3p0 "0.9.5.2"]
                  [com.stuartsierra/component "0.3.2"]
                  [expound "0.6.0"]
-                 [leiningen-core "2.8.1"]
                  [funcool/clojure.jdbc "0.9.0"]
                  [io.pedestal/pedestal.jetty "0.5.3"]
                  [io.pedestal/pedestal.service "0.5.3"]
@@ -29,13 +28,7 @@
   :repl-options {:port 41234}
   :min-lein-version "2.0.0"
   :resource-paths ["config" "resources"]
-  :profiles {:dev {:aliases {"run-dev" ["trampoline" "run" "-m" "playground.server/run-dev"]}
-                   :plugins [[cider/cider-nrepl "0.18.0-SNAPSHOT"]
-                             [refactor-nrepl "2.4.0-SNAPSHOT"]]
-                   :dependencies [[io.pedestal/pedestal.service-tools "0.5.3"]
-                                  [org.clojure/tools.namespace "0.2.11"]
-                                  [com.stuartsierra/component.repl "0.2.0"]]
+  :profiles {:dev {:dependencies [[io.pedestal/pedestal.service-tools "0.5.3"]]
                    :source-paths ["dev"]}
              :uberjar {:aot [playground.server]}}
   :main ^{:skip-aot true} playground.server)
-

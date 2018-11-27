@@ -21,12 +21,6 @@
       server/default-interceptors
       server/dev-interceptors))
 
-(defn run-dev
-  "The entry-point for 'lein run-dev'"
-  [& args]
-  (println "\nCreating your [DEV] server...")
-  (-> dev-map server/create-server server/start))
-
 (defn -main
   "The entry-point for 'lein run'"
   [& args]

@@ -13,18 +13,14 @@
    [clojure.pprint :refer [pprint]]
    [clojure.set :as set]
    [clojure.string :as string]
-   [clojure.tools.namespace.repl :refer [refresh refresh-all clear]]
    [com.grzm.component.pedestal :as pedestal-component]
    [com.stuartsierra.component :as component]
-   [com.stuartsierra.component.repl :refer [reset set-init start stop system]]
+   [com.stuartsierra.component.repl :refer [set-init]]
    [modular.postgres]
    [background-processing.background-processor :as background-processor]
    [background-processing.enqueuer :as enqueuer]
    [playground.server]
    [playground.service]))
-
-;; NOTE: Do not try to load source code from 'resources' directory
-(clojure.tools.namespace.repl/set-refresh-dirs "dev" "src" "test")
 
 (defn dev-system
   []
