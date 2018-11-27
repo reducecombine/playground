@@ -37,3 +37,4 @@ out/
 build/
 
 /.aws
+/.env
