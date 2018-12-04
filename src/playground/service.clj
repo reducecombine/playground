@@ -10,7 +10,8 @@
    [ring.util.response :as ring-resp]
    [playground.coerce :as coerce]
    [playground.jobs.sample]
-   [playground.services.invoices.insert.endpoint :as invoices.insert]))
+   [playground.services.invoices.insert.endpoint :as invoices.insert]
+   [playground.services.invoices.delete.endpoint :as invoices.delete]))
 
 (defn about-page [request]
   (->> (route/url-for ::about-page)
@@ -67,7 +68,8 @@
   #{["/" :get (conj common-interceptors `home-page)]
     ["/about" :get (conj common-interceptors `about-page)]
     ["/api" :get (into component-interceptors [http/json-body (param-spec-interceptor ::api :query-params) `api])]
-    ["/invoices/insert" :get (into component-interceptors [http/json-body (param-spec-interceptor ::invoices.insert/api :query-params) `invoices.insert/perform])]})
+    ["/invoices/insert" :get (into component-interceptors [http/json-body (param-spec-interceptor ::invoices.insert/api :query-params) `invoices.insert/perform])]
+    ["/invoices/delete" :get (into component-interceptors [http/json-body `invoices.delete/perform])]})
 
 (comment
   (def routes
