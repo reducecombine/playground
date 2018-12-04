@@ -7,10 +7,10 @@
       (hh/values [{:email (str amount "@" random-uuid ".com")}])))
 
 (def to-query
-  {:select [:id :email]
-   :from [:users]
+  {:select   [:id :email]
+   :from     [:users]
    :order-by [[:id :desc]]
-   :limit 1})
+   :limit    1})
 
 (defn to-serialize [results]
   (-> results first (select-keys [:id :email])))

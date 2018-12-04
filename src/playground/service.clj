@@ -31,18 +31,18 @@
   (go
     (-> enqueuer :channel (>! (playground.jobs.sample/new temperature))))
   {:status 200
-   :body {:temperature temperature :orientation orientation}})
+   :body   {:temperature temperature :orientation orientation}})
 
 (defn param-spec-interceptor
   "Coerces params according to a spec. If invalid, aborts the interceptor-chain with 422, explaining the issue."
   [spec params-key]
-  {:name ::param-spec-interceptor
+  {:name  ::param-spec-interceptor
    :enter (fn [context]
             (let [result (coerce/coerce-map-indicating-invalidity spec (get-in context [:request params-key]))]
               (if (contains? result ::coerce/invalid?)
                 (-> context
                     (assoc :response {:status 422
-                                      :body {:explanation (spec/explain-str spec result)}})
+                                      :body   {:explanation (spec/explain-str spec result)}})
                     interceptor-chain/terminate)
                 (assoc-in context [:request params-key] result))))})
 
@@ -52,7 +52,7 @@
                       (assoc-in v [:request component] (pedestal-component/use-component request component)))
                     context
                     components))
-   :name ::context-injector})
+   :name  ::context-injector})
 
 (def components-to-inject [:db :background-processor :enqueuer])
 
@@ -73,8 +73,8 @@
   (def routes
     "Map-based routes"
     `{"/" {:interceptors [(body-params/body-params) http/html-body]
-           :get home-page
-           "/about" {:get about-page}}})
+           :get          home-page
+           "/about"      {:get about-page}}})
   (def routes
     "Terse/Vector-based routes"
     `[[["/" {:get home-page}
@@ -84,13 +84,13 @@
 ;; Consumed by playground.server/create-server
 ;; See http/default-interceptors for additional options you can configure
 (def service
-  {:env :prod
+  {:env                     :prod
    ;; You can bring your own non-default interceptors. Make
    ;; sure you include routing and set it up right for
    ;; dev-mode. If you do, many other keys for configuring
    ;; default interceptors will be ignored.
    ;; ::http/interceptors []
-   ::http/routes routes
+   ::http/routes            routes
    ;; Uncomment next line to enable CORS support, add
    ;; string(s) specifying scheme, host and port for
    ;; allowed source(s):
@@ -108,16 +108,16 @@
    ;; :frame-ancestors "'none'"}}
 
    ;; Root for resource interceptor that is available by default.
-   ::http/resource-path "/public"
+   ::http/resource-path     "/public"
 
    ;; Either :jetty, :immutant or :tomcat (see comments in project.clj)
    ;; This can also be your own chain provider/server-fn -- http://pedestal.io/reference/architecture-overview#_chain_provider
-   ::http/type :jetty
+   ::http/type              :jetty
    ;; ::http/host "localhost"
-   ::http/port 8080
+   ::http/port              8080
    ;; Options to pass to the container (Jetty)
    ::http/container-options {:h2c? true
-                             :h2? false
+                             :h2?  false
                              ;; :keystore "test/hp/keystore.jks"
                              ;; :key-password "password"
                              ;; :ssl-port 8443

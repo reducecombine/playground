@@ -8,16 +8,16 @@
 
 (def dev-map
   (-> service/service ;; start with production configuration
-      (merge {:env :dev
+      (merge {:env                     :dev
               ;; do not block thread that starts web server
-              ::server/join? false
+              ::server/join?           false
               ;; Routes can be a function that resolve routes,
               ;;  we can use this to set the routes to be reloadable
-              ::server/routes #(route/expand-routes (deref #'service/routes))
+              ::server/routes          #(route/expand-routes (deref #'service/routes))
               ;; all origins are allowed in dev mode
               ::server/allowed-origins {:creds true :allowed-origins any?}
               ;; Content Security Policy (CSP) is mostly turned off in dev mode
-              ::server/secure-headers {:content-security-policy-settings {:object-src "none"}}})
+              ::server/secure-headers  {:content-security-policy-settings {:object-src "none"}}})
       server/default-interceptors
       server/dev-interceptors))
 
@@ -37,9 +37,9 @@
     (if service
       this
       (cond-> service-map
-        true server/create-server
+        true                      server/create-server
         (not (test? service-map)) server/start
-        true ((partial assoc this :service)))))
+        true                      ((partial assoc this :service)))))
 
   (stop [this]
     (when (and service (not (test? service-map)))
