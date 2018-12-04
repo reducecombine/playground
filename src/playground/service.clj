@@ -7,12 +7,10 @@
    [io.pedestal.http.route :as route]
    [io.pedestal.http.body-params :as body-params]
    [io.pedestal.interceptor.chain :as interceptor-chain]
-   [jdbc.core :as funcool-jdbc]
-   [clojure.java.jdbc :as clojure-jdbc]
    [ring.util.response :as ring-resp]
    [playground.coerce :as coerce]
    [playground.jobs.sample]
-   [playground.spec-utils :as spec-utils]))
+   [playground.services.invoices.insert.endpoint :as invoices.insert]))
 
 (defn about-page [request]
   (->> (route/url-for ::about-page)
@@ -30,12 +28,6 @@
 (spec/def ::api (spec/keys :req-un [::temperature ::orientation]))
 
 (defn api [{{:keys [temperature orientation]} :query-params :keys [db enqueuer] :as request}]
-  (comment
-    (-> db :pool funcool-jdbc/connection (funcool-jdbc/fetch ["select * from users"]) first prn)
-    (-> (->> db :pool (hash-map :datasource))
-        (clojure-jdbc/query ["select * from users"])
-        first
-        prn))
   (go
     (-> enqueuer :channel (>! (playground.jobs.sample/new temperature))))
   {:status 200
@@ -74,7 +66,8 @@
   "Tabular routes"
   #{["/" :get (conj common-interceptors `home-page)]
     ["/about" :get (conj common-interceptors `about-page)]
-    ["/api" :get (into component-interceptors [http/json-body (param-spec-interceptor ::api :query-params) `api])]})
+    ["/api" :get (into component-interceptors [http/json-body (param-spec-interceptor ::api :query-params) `api])]
+    ["/invoices/insert" :get (into component-interceptors [http/json-body (param-spec-interceptor ::invoices.insert/api :query-params) `invoices.insert/perform])]})
 
 (comment
   (def routes
@@ -129,4 +122,3 @@
                              ;; :key-password "password"
                              ;; :ssl-port 8443
                              :ssl? false}})
-

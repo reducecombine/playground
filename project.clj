@@ -12,7 +12,7 @@
                  [com.mchange/c3p0 "0.9.5.2"]
                  [com.stuartsierra/component "0.3.2"]
                  [expound "0.6.0"]
-                 [funcool/clojure.jdbc "0.9.0"]
+                 [honeysql "0.9.4"]
                  [io.pedestal/pedestal.jetty "0.5.3"]
                  [io.pedestal/pedestal.service "0.5.3"]
                  [juxt.modular/postgres "0.0.1-SNAPSHOT"]
