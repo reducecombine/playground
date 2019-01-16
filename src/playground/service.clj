@@ -12,7 +12,9 @@
    [playground.jobs.sample]
    [playground.services.invoices.insert.endpoint :as invoices.insert]
    [playground.services.invoices.retrieve.endpoint :as invoices.retrieve]
-   [playground.services.invoices.delete.endpoint :as invoices.delete]))
+   [playground.services.invoices.update.endpoint :as invoices.update]
+   [playground.services.invoices.delete.endpoint :as invoices.delete]
+   [io.pedestal.log :as log]))
 
 (defn about-page [request]
   (->> (route/url-for ::about-page)
@@ -40,13 +42,22 @@
   [spec params-key]
   {:name  ::param-spec-interceptor
    :enter (fn [context]
-            (let [result (coerce/coerce-map-indicating-invalidity spec (get-in context [:request params-key]))]
+            (let [params? (= params-key :params)
+                  params  (if params?
+                            (merge (get-in context [:request :path-params]) ;; These are eaten for some reason
+                                   (get-in context [:request :params]))
+                            (get-in context [:request params-key]))
+                  result  (coerce/coerce-map-indicating-invalidity spec params)]
               (if (contains? result ::coerce/invalid?)
                 (-> context
                     (assoc :response {:status 422
                                       :body   {:explanation (spec/explain-str spec result)}})
                     interceptor-chain/terminate)
-                (assoc-in context [:request params-key] result))))})
+                (assoc-in context
+                          [:request (if params?
+                                      :params
+                                      params-key)]
+                          result))))})
 
 (defn context-injector [components]
   {:enter (fn [{:keys [request] :as context}]
@@ -71,6 +82,7 @@
     ["/api" :get (into component-interceptors [http/json-body (param-spec-interceptor ::api :query-params) `api])]
     ["/invoices/insert" :get (into component-interceptors [http/json-body (param-spec-interceptor ::invoices.insert/api :query-params) `invoices.insert/perform])]
     ["/invoices/:id" :get (into component-interceptors [http/json-body (param-spec-interceptor ::invoices.retrieve/api :path-params) `invoices.retrieve/perform])]
+    ["/invoices/:id/update" :get (into component-interceptors [http/json-body (param-spec-interceptor ::invoices.update/api :params) `invoices.update/perform])]
     ["/invoices/delete" :get (into component-interceptors [http/json-body `invoices.delete/perform])]})
 
 (comment
