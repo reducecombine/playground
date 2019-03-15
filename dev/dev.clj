@@ -28,7 +28,7 @@
    :service-map playground.server/dev-map
    :background-processor (background-processor/new :queue-name "cljtest")
    :enqueuer (enqueuer/new :queue-name "cljtest")
-   :db (modular.postgres/map->Postgres {:url "jdbc:postgresql:ebdb" :user "vemv" :password ""})
+   :db (modular.postgres/map->Postgres {:url "jdbc:postgresql:ebdb" :user "root" :password ""})
    :pedestal (component/using (pedestal-component/pedestal (constantly playground.server/dev-map))
                               playground.service/components-to-inject)))
 
