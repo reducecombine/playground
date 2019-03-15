@@ -7,7 +7,6 @@
                  [background-processing "0.1.0-SNAPSHOT"]
                  [better-cond "1.0.1"]
                  [ch.qos.logback/logback-classic "1.1.8" :exclusions [org.slf4j/slf4j-api]]
-                 [com.gfredericks/how-to-ns "0.1.9"]
                  [com.grzm/component.pedestal "0.1.7"]
                  [com.mchange/c3p0 "0.9.5.2"]
                  [com.stuartsierra/component "0.4.0"]
