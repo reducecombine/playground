@@ -4,7 +4,10 @@
    [com.stuartsierra.component :as component]
    [io.pedestal.http :as server]
    [io.pedestal.http.route :as route]
-   [playground.service :as service]))
+   [playground.service :as service]
+   [com.grzm.component.pedestal :as pedestal-component]
+   [background-processing.background-processor :as background-processor]
+   [background-processing.enqueuer :as enqueuer]))
 
 (def dev-map
   (-> service/service ;; start with production configuration
@@ -21,11 +24,21 @@
       server/default-interceptors
       server/dev-interceptors))
 
-(defn -main
-  "The entry-point for 'lein run'"
-  [& args]
-  (println "\nCreating your server...")
-  (-> service/service server/create-server server/start))
+(defn production-system []
+  (let [queue-name "playground-production"
+        production-map (-> service/service
+                     (merge {:env :production})
+                     (server/default-interceptors))]
+    (component/system-map
+     :service-map production-map
+     :background-processor (background-processor/new :queue-name queue-name)
+     :enqueuer (enqueuer/new :queue-name queue-name)
+     :db (modular.postgres/map->Postgres {:url "jdbc:postgresql:ebdb" :user "root" :password ""})
+     :pedestal (component/using (pedestal-component/pedestal (constantly production-map))
+                                service/components-to-inject))))
+
+(defn -main [& args]
+  (-> (production-system) (component/start)))
 
 (defn test?
   [service-map]
